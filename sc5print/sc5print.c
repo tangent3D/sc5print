@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define BUFFER_SIZE 27136/
+#define BUFFER_SIZE 27136
 
 int main(int argc, char* argv[])
 {
