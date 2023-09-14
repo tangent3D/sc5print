@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define VRAM_SIZE 27136 // 212 rows of 128 bytes
+#define BUFFER_SIZE 27136 // 212 rows of 128 bytes (size of VRAM dump portion of SC5 file)
 
 #define EC 0x1B // PCL5 escape character
 
@@ -29,15 +29,16 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    // IMPORTANT: MSX-DOS will round detected file size up to nearest 128 bytes!
-    // if (ftell(read_ptr) != 27143) // Verify file is exactly 27,143 bytes
+    // // Verify file is exactly 27,143 bytes
+    // // IMPORTANT: MSX-DOS will round detected file size up to nearest 128 bytes!
+    // if (ftell(read_ptr) != 27143)
     // {
         // fclose(read_ptr);
         // printf("Invalid file size. Valid SC5 files are 27,143 bytes.\n");
         // return 1;
     // }
 
-    unsigned char buffer[VRAM_SIZE] = {}; // File input buffer
+    unsigned char buffer[BUFFER_SIZE] = {}; // File input buffer
 
     FILE *write_ptr; // Write to file for testing
     remove("out.pcl"); // Get rid of existing output if exists
@@ -48,19 +49,19 @@ int main(int argc, char* argv[])
                                 EC, '&', 'l', '2', '6', 'A',                            // Page size (A4)
                                 EC, '&', 'l', '1', 'O',                                 // Orientation (landscape)
                                 EC, '&', 'l', '1', 'E',                                 // Top margin
-                                EC, '*', 'p', '6', '7', '8', 'x', '3', '4', '0', 'Y',                       // Position cursor
-                                EC, '*', 't', '7', '5', 'R',                            // Raster graphics resolution
+                                EC, '*', 'p', '6', '7', '8', 'x', '3', '4', '0', 'Y',   // Position cursor (center image on page)
+                                EC, '*', 't', '7', '5', 'R',                            // Raster graphics resolution (75 DPI)
                                 EC, '*', 'r', '0', 'F',                                 // Raster presentation method
                                 EC, '*', 'r', '1', 'A'};                                // Start raster graphics
 
-    unsigned char pclRow[] =   {EC, '*', 'b', '6', '4', 'W'};
+    unsigned char pclRow[] =   {EC, '*', 'b', '6', '4', 'W'};                           // 64 bytes per row
 
-    unsigned char pclEnd[] =   {EC, '*', 'r', 'C',
+    unsigned char pclEnd[] =   {EC, '*', 'r', 'C',                                      // End raster graphics
                                 EC, 'E',
                                 EC, '%', '-', '1', '2', '3', '4', '5', 'X'};
 
     fseek(read_ptr, 7, SEEK_SET); // Skip file header (7 bytes)
-    fread(buffer, VRAM_SIZE, 1, read_ptr); // Read SC5 VRAM dump into buffer
+    fread(buffer, BUFFER_SIZE, 1, read_ptr); // Read SC5 VRAM dump into buffer
 
     fwrite(pclInit, 1, sizeof(pclInit), write_ptr); // Write PCL initialization
 
