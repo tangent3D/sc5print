@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 
   convert(); // Convert contents of input buffer into output buffer
 
-  fwrite(outBuffer, 1, sizeof(outBuffer), write_ptr); // Write output buffer to file
+  fwrite(outBuffer, 1, sizeof outBuffer, write_ptr); // Write output buffer to file
 
   fclose(read_ptr);
   fclose(write_ptr);

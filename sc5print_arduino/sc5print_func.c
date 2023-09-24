@@ -16,18 +16,18 @@ void convert()
 {
   outIndex = 0;
 
-  writeArray(pclInit, sizeof(pclInit)); // Write PCL initialization to output buffer
+  writeArray(pclInit, sizeof pclInit); // Write PCL initialization to output buffer
 
   unsigned short int mask;
   unsigned short int word;
   unsigned char byte;
 
   // Skip first 7 bytes in buffer (SC5 header!)
-  for (int j = 7; j < sizeof(inBuffer); j = j + 128) // For each row in buffer (212 rows of 128 bytes)
+  for (int j = 7; j < sizeof inBuffer; j = j + 128) // For each row in buffer (212 rows of 128 bytes)
   {
     for (int i = 0; i < 2; i++) // Write each raster row twice
     {
-      writeArray(pclRow, sizeof(pclRow)); // Write PCL Transfer Raster Data by Row/Block
+      writeArray(pclRow, sizeof pclRow); // Write PCL Transfer Raster Data by Row/Block
       for (int k = 0; k < 128; k = k + 4) // For each set of four VRAM bytes in row, compose one raster word
       {
         mask = 0b1100000000000000;
@@ -58,7 +58,7 @@ void convert()
       }
     }
   }
-  writeArray(pclEnd, sizeof(pclEnd)); // Write PCL ending to output buffer
+  writeArray(pclEnd, sizeof pclEnd ); // Write PCL ending to output buffer
 }
 
 void writeArray(const unsigned char* array, int size) // Append array to output buffer
