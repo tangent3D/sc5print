@@ -27,6 +27,8 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    // Write out contents of file to printer port in chunks
+    // NOTE: Total bytes written will round up to nearest 128 bytes!
     unsigned char buffer[BUFFER_SIZE] = {};
     int nread;
     while ((nread = fread(buffer, 1, sizeof buffer, read_ptr)) > 0)
