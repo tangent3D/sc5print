@@ -1,18 +1,32 @@
 // MSX SC5 file input to PCL5 WiFi printer output for ESP32-WROOM-DA
 // tangent.space 2023
 
-#include <stdio.h>
 #include "sc5print.h"
+#include <stdio.h>
 
-char inBuffer[INPUT_BUFFER_SIZE] = {};
-char outBuffer[OUTPUT_BUFFER_SIZE] = {};
+
+char outBuffer[OUTPUT_BUFFER_SIZE] = {}; 
 int outIndex;
 
-extern const unsigned char pclInit[];
-extern const unsigned char pclRow[];
-extern const unsigned char pclEnd[];
+// PCL5 command constants
+const unsigned char pclInit[] = {EC, '%', '-', '1', '2', '3', '4', '5', 'X',             // Exit language
+                                 EC, 'E',                                                // Printer reset
+                                 EC, '&', 'l', '2', '6', 'A',                            // Page size (A4)
+                                 EC, '&', 'l', '1', 'O',                                 // Orientation (landscape)
+                                 EC, '&', 'l', '1', 'E',                                 // Top margin
+                                 EC, '*', 'p', '6', '7', '8', 'x', '3', '4', '0', 'Y',   // Position cursor (center image on page)
+                                 EC, '*', 't', '7', '5', 'R',                            // Raster graphics resolution (75 DPI)
+                                 EC, '*', 'r', '0', 'F',                                 // Raster presentation method
+                                 EC, '*', 'r', '1', 'A'};                                // Start raster graphics
 
-void convert()
+const unsigned char pclRow[] =  {EC, '*', 'b', '6', '4', 'W'};                           // 64 bytes per row
+
+const unsigned char pclEnd[] =  {EC, '*', 'r', 'C',                                      // End raster graphics
+                                 EC, 'E',
+                                 EC, '%', '-', '1', '2', '3', '4', '5', 'X'};
+
+
+void convert() // Convert contents of inBuffer (SC5) into outBuffer (PCL)
 {
   outIndex = 0;
 

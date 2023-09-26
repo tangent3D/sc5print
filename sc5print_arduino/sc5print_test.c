@@ -1,11 +1,14 @@
 // MSX SC5 file input to PCL5 WiFi printer output for ESP32-WROOM-DA
 // tangent.space 2023
 
-#ifdef TEST // Prevent code from compiling in Arduino IDE
+#ifdef TEST // Prevent code from compiling in Arduino IDE 
 
-#include "sc5print_func.c"
+#include "sc5print.h"
+#include <stdio.h>
 
 // Generate an executable and write output buffer as file for testing
+
+char inBuffer[INPUT_BUFFER_SIZE] = {};
 
 int main(int argc, char* argv[])
 {

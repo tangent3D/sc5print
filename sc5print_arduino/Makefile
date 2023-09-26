@@ -1,7 +1,7 @@
 default: test
 
 test:
-	@gcc -D TEST -x c sc5print_test.c -o sc5print
+	@gcc -D TEST sc5print.c sc5print_test.c -o sc5print
 	@./sc5print test_in.sc5
 
 dump:
