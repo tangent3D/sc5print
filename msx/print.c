@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    FILE *read_ptr = fopen(argv[1], "rb"); // Attempt to file from argument
+    FILE *read_ptr = fopen(argv[1], "rb"); // Attempt to read file from argument
 
     if (read_ptr == NULL) // Verify file exists
     {
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
     int nread;
     while ((nread = fread(buffer, 1, sizeof buffer, read_ptr)) > 0)
     {
-        printf("%d\n",nread); // Print amount of bytes read
+        //printf("%d\n",nread); // Print amount of bytes read
         for (int i = 0; i < nread; i++)
         {
           DATA = buffer[i];
