@@ -1,4 +1,5 @@
 // Command-line utility to convert monochrome MSX2/2+/tR .SC5 VRAM dumps to printable PCL5 commands
+// SC5 colors 0 = black, 15 = white
 // tangent.space 2023
 
 #include "sc5pcl.h"
@@ -113,13 +114,15 @@ void convertRow()
   unsigned int word;
   unsigned int inIndex; 
 
-  for (unsigned int k = 0; k < 128; k = k + 4) // For each set of four VRAM bytes in row, compose one raster word
+  // For each set of four VRAM bytes in row, compose one raster word
+  for (unsigned int k = 0; k < 128; k = k + 4)
   {
     // Rotate a mask to double image size horizontally
     mask = 0b1100000000000000;
     word = 0b0000000000000000;
 
-    for (unsigned int l = 0; l < 4; l++) // For each VRAM byte in set of four
+    // For each VRAM byte in set of four
+    for (unsigned int l = 0; l < 4; l++)
     {
       if ((rowBuffer[inIndex+k+l] & 0xF0) < 0xF0) // If upper nibble of byte < F, set bits
       {
