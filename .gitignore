@@ -1,6 +1,7 @@
 *.bin
 *.com
 *.pcl
+*.sc5
 
 # Prerequisites
 *.d
