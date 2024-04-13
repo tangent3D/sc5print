@@ -42,9 +42,23 @@ int main(int argc, char* argv[])
       return 1;
   }
 
-  FILE *read_ptr = fopen(argv[1], "rb"); // Get SC5 file from argument
-
   // Error checking
+
+  // Check argument extension
+  char *ext = strrchr(argv[1], '.');
+  if (!ext)
+  {
+    // FIXME: final text
+    printf("no extension");
+    return 1;
+  }
+  else
+  {
+    // FIXME: exit if extension is not SC5
+    printf("extension is %s\n", ext + 1);
+  }
+
+  FILE *read_ptr = fopen(argv[1], "rb"); // Get SC5 file from argument
 
   if (read_ptr == NULL) // Verify file exists
   {
@@ -61,9 +75,6 @@ int main(int argc, char* argv[])
       return 1;
   }
 
-  // FIXME:
-  // Verify argument extension  
-
   if (ftell(read_ptr) < SC5_FILE_SIZE) // Verify file is at least 27,143 bytes
   {
     fclose(read_ptr);
@@ -72,10 +83,10 @@ int main(int argc, char* argv[])
   }
 
   // Read SC5 file into input buffer (skips SC5 header (7 bytes))
-  fseek(read_ptr, 7, SEEK_SET); 
+  fseek(read_ptr, 7, SEEK_SET);
 
   // Put PCL initialization to output buffer
-  writeArray(pclInit, sizeof pclInit); 
+  writeArray(pclInit, sizeof pclInit);
 
   // Convert each pixel row in SC5 to PCL5 and put each row twice in output buffer to double image size vertically
   for (int i = 0; i < TOTAL_ROWS; i++)
@@ -86,7 +97,7 @@ int main(int argc, char* argv[])
     writeArray(pclRow, sizeof pclRow); // Write PCL Transfer Raster Data by Row/Block
     convertRow();
   }
-  
+
   // Put PCL ending to output buffer
   writeArray(pclEnd, sizeof pclEnd);
 
@@ -112,7 +123,7 @@ void convertRow()
 {
   unsigned int mask;
   unsigned int word;
-  unsigned int inIndex; 
+  unsigned int inIndex;
 
   // For each set of four VRAM bytes in row, compose one raster word
   for (unsigned int k = 0; k < 128; k = k + 4)
