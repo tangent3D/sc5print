@@ -2,6 +2,10 @@
 // SC5 colors 0 = black, 15 = white
 // tangent.space 2023
 
+
+// test
+#include "third-party/asm.h"
+
 #include "sc5pcl.h"
 #include <stdio.h>
 #include <malloc.h>
