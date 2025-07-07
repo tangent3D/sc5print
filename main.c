@@ -1,16 +1,12 @@
 // tangent.space 2025
 
 #include "sc5print.h"
+#include "tcp.h"
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
 
-// Include ASMLIB for UNAPI interop
-#ifdef TARGET_MSX
-#include "third-party/asm.h"
-#endif
-
-OutputMode output_mode = OUTPUT_FILE;
+OutputMode output_mode = OUTPUT_TCP;
 
 FILE *read_ptr = NULL;
 FILE *write_ptr= NULL;
@@ -69,7 +65,10 @@ int main(int argc, char* argv[])
   if (init_buffers() != 0) goto fail;
 
   // Open and prepare to append to debug output file 'OUT.PCL'
-  if (init_file_output() != 0) goto fail;
+  if (output_mode == OUTPUT_FILE && init_file_output() != 0) goto fail;
+
+  // Initialize UNAPI TCP connection
+  if (output_mode == OUTPUT_TCP && init_tcp_connection() != 0) goto fail;
 
   convert();
 
@@ -243,15 +242,14 @@ void flush_output()
   if (output_mode == OUTPUT_FILE)
   {
     fwrite(outputBuffer, 1, outputBufferIndex, write_ptr);
-    //fflush(write_ptr);
+    printf("Wrote %u bytes\n", outputBufferIndex);
   }
 
   if (output_mode == OUTPUT_TCP)
   {
-    // TODO
+    send_tcp_data(outputBuffer, outputBufferIndex);
   }
 
-  printf("Flushed %u bytes\n", outputBufferIndex);
   outputBufferIndex = 0;
 }
 
@@ -263,4 +261,6 @@ void cleanup()
   if (inputRowBuffer) free(inputRowBuffer);
   if (convertedRowBuffer) free(convertedRowBuffer);
   if (outputBuffer) free(outputBuffer);
+
+  if (output_mode == OUTPUT_TCP) close_tcp_connection();
 }
