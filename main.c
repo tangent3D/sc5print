@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include <string.h>
 
+// FIXME: Set output_mode according to arguments
 OutputMode output_mode = OUTPUT_TCP;
 
 FILE *read_ptr = NULL;
@@ -70,6 +71,7 @@ int main(int argc, char* argv[])
   // Initialize UNAPI TCP connection
   if (output_mode == OUTPUT_TCP && init_tcp_connection() != 0) goto fail;
 
+  // Convert SC5 data to PCL and output according to output mode
   convert();
 
   // Program finished successfully  
@@ -159,6 +161,7 @@ int init_file_output()
   return 0;
 }
 
+// Convert SC5 data to PCL to output buffer
 void convert()
 {
   // Output PCL initialization
@@ -183,6 +186,7 @@ void convert()
   flush_output();
 }
 
+// Convert each pixel row of SC5 data to PCL to buffer
 void convert_row()
 {
   unsigned int stretchedByte;
@@ -219,7 +223,7 @@ void convert_row()
   }
 }
 
-// Output data according to output mode
+// Write specified data to output buffer
 void output(const void *data, unsigned int length)
 {
   const unsigned char *bytes = (const unsigned char *)data;
@@ -235,6 +239,7 @@ void output(const void *data, unsigned int length)
   }
 }
 
+// Flush data in output buffer according to output mode
 void flush_output()
 {
   if (outputBufferIndex == 0) return;
