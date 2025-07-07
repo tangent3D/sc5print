@@ -182,7 +182,7 @@ void convert()
   // Output PCL ending
   output(pclEnd, sizeof pclEnd);
 
-  // Flush any remaining data
+  // Flush any remaining data in output buffer
   flush_output();
 }
 
