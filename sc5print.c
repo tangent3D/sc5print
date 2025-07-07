@@ -180,6 +180,7 @@ void convert()
   // Output PCL ending
   output(pclEnd, sizeof pclEnd);
 
+  // Flush any remaining data
   flush_output();
 }
 
@@ -242,14 +243,14 @@ void flush_output()
   if (output_mode == OUTPUT_FILE)
   {
     fwrite(outputBuffer, 1, outputBufferIndex, write_ptr);
-    fflush(write_ptr);
+    //fflush(write_ptr);
   }
 
   if (output_mode == OUTPUT_TCP)
   {
     // TODO
   }
-  
+
   printf("Flushed %u bytes\n", outputBufferIndex);
   outputBufferIndex = 0;
 }
