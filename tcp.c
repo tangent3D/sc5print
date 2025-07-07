@@ -13,15 +13,10 @@ int init_tcp_connection()
 {
   #ifdef TARGET_MSX
 
-  if (UnapiGetCount("TCP") == 0) 
+  if (UnapiGetCount("TCP/IP") == 0) 
   {
-    printf("No UNAPI TCP implementation found.\n");
+    printf("No UNAPI TCP/IP implementation found.\n");
     return 1;
-  }
-
-  if (UnapiGetCount("TCP") != 0) 
-  {
-    printf("UNAPI TCP implementation found.\n");
   }
 
   #endif
