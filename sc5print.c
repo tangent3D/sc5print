@@ -16,6 +16,8 @@ FILE *read_ptr = NULL;
 FILE *write_ptr= NULL;
 unsigned char *inputRowBuffer = NULL;
 unsigned char *convertedRowBuffer = NULL;
+unsigned char *outputBuffer = NULL;
+unsigned int outputBufferIndex = 0;
 
 // PCL5 command constants
 const unsigned char pclInit[] =
@@ -41,6 +43,18 @@ const unsigned char pclEnd[] =
   EC, '*', 'r', 'C',                                    // End raster graphics
   EC, 'E',
   EC, '%', '-', '1', '2', '3', '4', '5', 'X'
+};
+
+static const unsigned int nibbleMask[8] =
+{
+  0b1100000000000000,
+  0b0011000000000000,
+  0b0000110000000000,
+  0b0000001100000000,
+  0b0000000011000000,
+  0b0000000000110000,
+  0b0000000000001100,
+  0b0000000000000011
 };
 
 int main(int argc, char* argv[])
@@ -124,6 +138,10 @@ int init_buffers()
   convertedRowBuffer = malloc(sizeof *convertedRowBuffer * BYTES_PER_PCL_ROW);
   if (convertedRowBuffer == NULL) return 1;
 
+  // Global output buffer
+  outputBuffer = malloc(sizeof *outputBuffer * OUTPUT_BUFFER_SIZE);
+  if (outputBuffer == NULL) return 1;
+
   // Buffer initialization successful
   return 0;
 }
@@ -152,74 +170,88 @@ void convert()
   for (int i = 0; i < TOTAL_SC5_ROWS; i++)
   {
     fread(inputRowBuffer, BYTES_PER_SC5_ROW, 1, read_ptr);
+    convert_row();
     output(pclRow, sizeof pclRow);
-    output(convert_row(), BYTES_PER_PCL_ROW);
+    output(convertedRowBuffer, BYTES_PER_PCL_ROW);
     output(pclRow, sizeof pclRow);
     output(convertedRowBuffer, BYTES_PER_PCL_ROW);
   }
 
   // Output PCL ending
   output(pclEnd, sizeof pclEnd);
+
+  flush_output();
 }
 
-unsigned char* convert_row()
+void convert_row()
 {
-  unsigned int mask;
-  unsigned int word;
+  unsigned int stretchedByte;
   unsigned char* out = convertedRowBuffer;
 
-  // For each set of four VRAM bytes in row, compose one raster word
-  for (unsigned int k = 0; k < 128; k = k + 4)
+  // For each set of 4 input bytes = 8 nibbles = 8 VRAM pixels
+  // Stretch horizontally to 16 pixels (2 PCL raster bytes)
+  for (unsigned int inputSet = 0; inputSet < 128; inputSet += 4)
   {
-    // Rotate a mask to double image size horizontally
-    mask = 0b1100000000000000;
-    word = 0b0000000000000000;
+    stretchedByte = 0b0000000000000000;
 
     // For each VRAM byte in set of four
-    for (unsigned int l = 0; l < 4; l++)
+    for (unsigned int inputByte = 0; inputByte < 4; inputByte++)
     {
-      // If upper nibble of byte < F, set bits
-      if ((inputRowBuffer[k + l] & 0xF0) < 0xF0)
-      {
-        word = word | mask;
-      }
+      unsigned char byte = inputRowBuffer[inputSet + inputByte];
 
-      mask = mask >> 2; // Rotate bit mask
+      // If upper nibble of byte < F, set bits
+      unsigned char upper = byte & 0xF0;
+      if (upper < 0xF0)
+      {
+        stretchedByte |= nibbleMask[inputByte * 2];
+      }
 
       // If lower nibble of byte < F, set bits
-      if ((inputRowBuffer[k + l] & 0x0F) < 0x0F)
+      unsigned char lower = byte & 0x0F;
+      if (lower < 0x0F)
       {
-        word = word | mask;
+        stretchedByte |= nibbleMask[inputByte * 2 + 1];
       }
-
-      mask = mask >> 2; // Rotate bit mask
     }
 
-  *out++ = (unsigned char)(word >> 8);
-  *out++ = (unsigned char)(word);
+  *out++ = (unsigned char)(stretchedByte >> 8);
+  *out++ = (unsigned char)(stretchedByte);
   }
-
-  return convertedRowBuffer;
 }
 
 // Output data according to output mode
 void output(const void *data, unsigned int length)
 {
+  const unsigned char *bytes = (const unsigned char *)data;
+
+  for (unsigned int i = 0; i < length; i++)
+  {
+    if (outputBufferIndex >= OUTPUT_BUFFER_SIZE)
+    {
+      flush_output();
+    }
+
+    outputBuffer[outputBufferIndex++] = bytes[i];
+  }
+}
+
+void flush_output()
+{
+  if (outputBufferIndex == 0) return;
+
   if (output_mode == OUTPUT_FILE)
   {
-    // Cast data pointer to bytes
-    const unsigned char *bytes = (const unsigned char *)data;
-
-    for (unsigned int i = 0; i < length; i++)
-    {
-      fputc(bytes[i], write_ptr);
-    }
+    fwrite(outputBuffer, 1, outputBufferIndex, write_ptr);
+    fflush(write_ptr);
   }
 
   if (output_mode == OUTPUT_TCP)
   {
-
+    // TODO
   }
+  
+  printf("Flushed %u bytes\n", outputBufferIndex);
+  outputBufferIndex = 0;
 }
 
 // Clean up before exit
@@ -229,4 +261,5 @@ void cleanup()
   if (write_ptr) fclose(write_ptr);
   if (inputRowBuffer) free(inputRowBuffer);
   if (convertedRowBuffer) free(convertedRowBuffer);
+  if (outputBuffer) free(outputBuffer);
 }

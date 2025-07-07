@@ -12,6 +12,8 @@
 #define BYTES_PER_SC5_ROW 128   // 128 bytes row of SC5 data (256 pixels, 1 pixel =  4 bits)
 #define BYTES_PER_PCL_ROW 64    // 64 bytes (32 words) row of converted PCL raster data
 
+#define OUTPUT_BUFFER_SIZE 1024
+
 #define EC 0x1B // PCL5 escape character
 
 extern const unsigned char pclInit[];
@@ -27,17 +29,21 @@ typedef enum
 extern OutputMode output_mode;
 
 extern unsigned char *inputRowBuffer;     // Buffer SC5 row from file (128 bytes)
-extern unsigned char *convertedRowBuffer; // Buffer PCL row (64 bytes) 
+extern unsigned char *convertedRowBuffer; // Buffer PCL row (64 bytes)
+
+extern unsigned char *outputBuffer;
+extern unsigned int outputBufferIndex;
 
 // Function declarations
 
 int preflight(int argc, char* argv[]);
 int init_file_input(int argc, char* argv[]);
 int init_buffers();
-void convert();
-unsigned char* convert_row();
-void output(const void *data, unsigned int length);
 int init_file_output();
+void convert();
+void convert_row();
+void output(const void *data, unsigned int length);
+void flush_output();
 void cleanup();
 
 #endif
