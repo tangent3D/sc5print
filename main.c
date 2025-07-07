@@ -242,13 +242,14 @@ void flush_output()
   if (output_mode == OUTPUT_FILE)
   {
     fwrite(outputBuffer, 1, outputBufferIndex, write_ptr);
-    printf("Wrote %u bytes\n", outputBufferIndex);
   }
 
   if (output_mode == OUTPUT_TCP)
   {
     send_tcp_data(outputBuffer, outputBufferIndex);
   }
+
+  printf("Wrote %u bytes\n", outputBufferIndex);
 
   outputBufferIndex = 0;
 }
@@ -261,6 +262,5 @@ void cleanup()
   if (inputRowBuffer) free(inputRowBuffer);
   if (convertedRowBuffer) free(convertedRowBuffer);
   if (outputBuffer) free(outputBuffer);
-
   if (output_mode == OUTPUT_TCP) close_tcp_connection();
 }
