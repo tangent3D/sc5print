@@ -2,14 +2,16 @@
 // tangent.space 2025
 
 #include "sc5print.h"
+#include "tcp.h"
 #include <stdio.h>
+#include <string.h>
 
 // Include ASMLIB for UNAPI interop
 #ifdef TARGET_MSX
 
 #include "third-party/asm.h"
 
-unapi_code_block tcpCode;
+unapi_code_block unapiCodeBlock;
 
 #endif
 
@@ -23,37 +25,28 @@ int init_tcp_connection()
     return 1;
   }
 
-  UnapiBuildCodeBlock("TCP/IP", 0, &tcpCode);
+  UnapiBuildCodeBlock("TCP/IP", 0, &unapiCodeBlock);
 
-  // Print the unapi_code_block for debugging purposes
-  unsigned char slot;
-  unsigned char segment;
-  unsigned int address;  
-  UnapiParseCodeBlock(&tcpCode, &slot, &segment, &address);
-  printf("UNAPI code block: slot %u, segment %u, address %04X\n", slot, segment, address);
-
-  const char ip[] = "127.0.0.1";
-  unsigned char portBytes[2] = { 9100 >> 8, 9100 & 0xFF };
+  unsigned char params[13] =
+  {
+    127, 0, 0, 1,        // Remote IP (127.0.0.1)
+    0x23, 0x8C,          // Remote port (9100, big-endian)
+    0xFF, 0xFF,          // Local port (0 = auto)
+    0x00, 10,            // Timeout = 10 seconds
+    0x00,                // Flags
+    0x00, 0x00           // Skip host name validation
+  };
 
   Z80_registers regs;
+  memset(&regs, 0, sizeof regs);
 
-  regs.Words.DE = (unsigned int)&ip[0];         // IP address "x.x.x.x"
-  regs.Words.HL = (unsigned int)&portBytes[0];  // Port number (high, low)
-  regs.Bytes.C = 0;                             // 'Active' connection mode
-  regs.Bytes.A = 10;                            // Timeout (seconds)
+  regs.Words.HL = (unsigned int)&params[0];
 
-  UnapiCall(&tcpCode, 0, &regs, REGS_MAIN, REGS_MAIN);
+  printf("A = %u, HL = %04X\n", regs.Bytes.A, regs.Words.HL);
 
-  if (regs.Bytes.A == 0)
-  {
-      printf("Connection opened successfully!\n");
-      printf("Connection handle: %04X\n", regs.Words.HL);
-  } 
-  else
-  {
-      printf("TCP_OPEN failed.\n");
-      printf("Error code: %u\n", regs.Bytes.A);
-  }
+  UnapiCall(&unapiCodeBlock, TCPIP_TCP_OPEN, &regs, REGS_MAIN, REGS_MAIN);
+
+  printf("A = %u, B = %u, C = %u\n", regs.Bytes.A, regs.Bytes.B, regs.Bytes.C);
 
   #endif
 

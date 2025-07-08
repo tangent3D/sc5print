@@ -4,6 +4,10 @@
 #ifndef TCP_H
 #define TCP_H
 
+#define TCPIP_TCP_OPEN 13
+#define TCPIP_TCP_SEND 17
+#define TCPIP_TCP_CLOSE 14
+
 // Function declarations
 
 int init_tcp_connection();
