@@ -10,7 +10,7 @@
 #define BYTES_PER_SC5_ROW 128   // 128 bytes row of SC5 data
 #define BYTES_PER_PCL_ROW 64    // 64 bytes row of converted PCL raster data
 
-#define OUTPUT_BUFFER_SIZE 1024
+#define OUTPUT_BUFFER_SIZE 512
 
 #define EC 0x1B // PCL5 escape character
 
