@@ -9,7 +9,7 @@
 // Include ASMLIB for UNAPI interop
 #ifdef TARGET_MSX
 
-#include "third-party/asm.h"
+#include "arch/msx/asm.h"
 
 unapi_code_block codeBlock;
 Z80_registers regs;
@@ -27,6 +27,14 @@ int init_tcp_connection()
   }
 
   UnapiBuildCodeBlock(NULL, 1, &codeBlock);
+
+  // Attempt to call UNAPI_GET_INFO and print the output
+  regs.Bytes.A = 69;
+  printf("A = %u\n", regs.Bytes.A);
+  UnapiCall(&codeBlock, 0, &regs, REGS_MAIN, REGS_MAIN);
+  printf("A = %u, HL = %04X, DE = %04X, BC = %04X\n", regs.Bytes.A, regs.Words.HL, regs.Words.DE, regs.Words.BC);
+  // A = 0, HL = 6712, DE = 0101, BC = 0203
+  return 1;
 
   unsigned char params[13] =
   {
