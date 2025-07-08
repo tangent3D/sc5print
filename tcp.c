@@ -72,6 +72,10 @@ int close_tcp_connection()
 {
   #ifdef TARGET_MSX
   
+  // Close all open transient TCP connections
+  regs.Bytes.B = 0;
+  UnapiCall(&codeBlock, TCPIP_TCP_CLOSE, &regs, REGS_MAIN, REGS_MAIN);
+
   #endif
 
   return 0;
