@@ -11,7 +11,7 @@
 
 #include "third-party/asm.h"
 
-unapi_code_block unapiCodeBlock;
+unapi_code_block codeBlock;
 
 #endif
 
@@ -25,7 +25,7 @@ int init_tcp_connection()
     return 1;
   }
 
-  UnapiBuildCodeBlock("TCP/IP", 0, &unapiCodeBlock);
+  UnapiBuildCodeBlock(NULL, 1, &codeBlock);
 
   unsigned char params[13] =
   {
@@ -44,7 +44,7 @@ int init_tcp_connection()
 
   printf("A = %u, HL = %04X\n", regs.Bytes.A, regs.Words.HL);
 
-  UnapiCall(&unapiCodeBlock, TCPIP_TCP_OPEN, &regs, REGS_MAIN, REGS_MAIN);
+  UnapiCall(codeBlock, TCPIP_TCP_OPEN, &regs, REGS_MAIN, REGS_MAIN);
 
   printf("A = %u, B = %u, C = %u\n", regs.Bytes.A, regs.Bytes.B, regs.Bytes.C);
 
