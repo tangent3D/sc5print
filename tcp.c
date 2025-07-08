@@ -34,7 +34,6 @@ int init_tcp_connection()
   UnapiCall(&codeBlock, 0, &regs, REGS_MAIN, REGS_MAIN);
   printf("A = %u, HL = %04X, DE = %04X, BC = %04X\n", regs.Bytes.A, regs.Words.HL, regs.Words.DE, regs.Words.BC);
   // A = 0, HL = 6712, DE = 0101, BC = 0203
-  return 1;
 
   unsigned char params[13] =
   {
@@ -48,6 +47,7 @@ int init_tcp_connection()
 
   regs.Words.HL = (unsigned int)&params[0];
 
+  regs.Bytes.A = 69;
   printf("A = %u, HL = %04X\n", regs.Bytes.A, regs.Words.HL);
 
   UnapiCall(&codeBlock, TCPIP_TCP_OPEN, &regs, REGS_MAIN, REGS_MAIN);
