@@ -61,7 +61,7 @@ int init_tcp_connection()
 
     if (regs.Bytes.A == ERR_NO_CONN)
     {
-        printf("Connect failed: reason = %u\n", regs.Bytes.C);
+        printf("Connection failed: %u\n", regs.Bytes.C);
     }
 
   } while((regs.Bytes.A) == ERR_OK && (regs.Bytes.B != TCP_STATE_ESTABLISHED));
