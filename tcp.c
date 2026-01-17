@@ -17,6 +17,16 @@ unsigned char connNum;
 
 #endif
 
+unsigned char params[13] =
+{
+  0, 0, 0, 0,             // Remote IP placeholder (set by argument)
+  0x8C, 0x23,             // Remote port (default = 9100)
+  0xFF, 0xFF,             // Local port
+  0x05, 0x0,              // Use default timeout value
+  0x00,                   // Flags
+  0x00, 0x00              // Skip host name validation
+};
+
 int init_tcp_connection()
 {
   #ifdef TARGET_MSX
@@ -28,16 +38,6 @@ int init_tcp_connection()
   }
 
   UnapiBuildCodeBlock(NULL, 1, &codeBlock);
-
-  unsigned char params[13] =
-  {
-    192, 168 , 50, 79,      // Remote IP
-    0x8C, 0x23,             // Remote port (9100)
-    0xFF, 0xFF,             // Local port
-    0x05, 0x0,              // Use default timeout value
-    0x00,                   // Flags
-    0x00, 0x00              // Skip host name validation
-  };
 
   regs.Words.HL = (unsigned int)&params[0];
 

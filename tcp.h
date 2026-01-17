@@ -17,9 +17,7 @@
 
 #define TCP_STATE_ESTABLISHED 4
 
-extern unsigned char connNum;
-
-// Function declarations
+extern unsigned char params[13];
 
 int init_tcp_connection();
 int send_tcp_data(const void *data, unsigned int length);
