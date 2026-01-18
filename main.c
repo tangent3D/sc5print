@@ -7,7 +7,6 @@
 #include <malloc.h>
 #include <string.h>
 
-// FIXME: Set output_mode according to arguments
 OutputMode output_mode = OUTPUT_TCP;
 
 FILE *read_ptr = NULL;
@@ -25,6 +24,7 @@ int main(int argc, char* argv[])
   // Verify and open SC5 data for input, seek past SC5 header
   if (init_file_input(argc, argv) != 0) goto fail;
 
+  // Get destination IP and port from arguments
   if (init_tcp_params(argc, argv) != 0) goto fail;
 
   // Initialize memory allocation
