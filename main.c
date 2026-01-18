@@ -3,6 +3,7 @@
 #include "sc5print.h"
 #include "tcp.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
 
@@ -93,9 +94,9 @@ int init_file_input(int argc, char* argv[])
   return 0;
 }
 
-// Get destination IPv4 address from user and load to UNAPI params
 int init_tcp_params(int argc, char* argv[])
 {
+  // Get destination IPv4 address from user and load to UNAPI params
   unsigned int a, b, c, d;
 
   if (sscanf(argv[2], "%u.%u.%u.%u", &a, &b, &c, &d) != 4)
@@ -115,7 +116,26 @@ int init_tcp_params(int argc, char* argv[])
   params[2] = (unsigned char)c;
   params[3] = (unsigned char)d;
 
-  
+  // Optionally get destination port from user and load to UNAPI params
+  if (argc > 3 && argv[3] != NULL)
+  {
+    if (argv[3][0] < '0' || argv[3][0] > '9')
+    {
+      printf("Invalid port.\n");
+      return 1;
+    }
+
+    unsigned long port = strtoul(argv[3], NULL, 10);
+
+    if (port > 65535)
+    {
+      printf("Invalid port.\n");
+      return 1;
+    }
+
+    params[4] = (unsigned char)(port & 0x00FFul);
+    params[5] = (unsigned char)((port >> 8) & 0x00FFul);
+  }
 
   return 0;
 }
@@ -182,9 +202,6 @@ void output_flush()
   {
     send_tcp_data(outputBuffer, outputBufferIndex);
   }
-
-  // FIXME: remove this shizzle
-  printf("Wrote %u bytes\n", outputBufferIndex);
 
   outputBufferIndex = 0;
 }
