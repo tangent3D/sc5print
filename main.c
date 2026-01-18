@@ -39,9 +39,11 @@ int main(int argc, char* argv[])
   // Convert SC5 data to PCL and output according to output mode
   convert();
 
-  cleanup();
-
-  return 0;
+  success:
+    // FIXME: figure out how to check if connection is open at all before attempting to close it...? 
+    if (output_mode == OUTPUT_TCP) close_tcp_connection();
+    cleanup();
+    return 0;
 
   fail:
     cleanup();
@@ -214,5 +216,4 @@ void cleanup()
   if (inputRowBuffer) free(inputRowBuffer);
   if (convertedRowBuffer) free(convertedRowBuffer);
   if (outputBuffer) free(outputBuffer);
-  if (output_mode == OUTPUT_TCP) close_tcp_connection();
 }

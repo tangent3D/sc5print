@@ -13,9 +13,10 @@
 
 unapi_code_block codeBlock;
 Z80_registers regs;
-unsigned char connNum;
 
 #endif
+
+unsigned char connNum;
 
 unsigned char params[13] =
 {
@@ -41,6 +42,7 @@ int init_tcp_connection()
 
   regs.Words.HL = (unsigned int)&params[0];
 
+  // Open a TCP connection
   UnapiCall(&codeBlock, TCPIP_TCP_OPEN, &regs, REGS_MAIN, REGS_MAIN);
   if (regs.Bytes.A != ERR_OK)
   {
@@ -57,13 +59,11 @@ int init_tcp_connection()
     regs.Bytes.B = connNum;
     regs.Words.HL = 0;
     UnapiCall(&codeBlock, TCPIP_TCP_STATE, &regs, REGS_MAIN, REGS_MAIN);
-    printf("A = %u, B = %u\n", regs.Bytes.A, regs.Bytes.B);
 
-    if (regs.Bytes.A == ERR_NO_CONN)
+    if (regs.Bytes.A != ERR_OK)
     {
-        printf("Connection failed: %u\n", regs.Bytes.C);
+        printf("Connection error: %u\n", regs.Bytes.C);
     }
-
   } while((regs.Bytes.A) == ERR_OK && (regs.Bytes.B != TCP_STATE_ESTABLISHED));
 
   #endif
@@ -83,12 +83,6 @@ int send_tcp_data(const void *data, unsigned int length)
     regs.Words.HL = length;   // Length of the data to be sent
     regs.Bytes.C = 0;         // Flags
     UnapiCall(&codeBlock, TCPIP_TCP_SEND, &regs, REGS_MAIN, REGS_MAIN);
-    printf("A = %u\n", regs.Bytes.A);
-
-    if (regs.Bytes.A == ERR_BUFFER)
-    {
-            printf("Buffer is full.\n");
-    }
   } while((regs.Bytes.A) == ERR_BUFFER);
 
   #endif
