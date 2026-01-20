@@ -19,7 +19,7 @@ unsigned int outputBufferIndex = 0;
 int main(int argc, char* argv[])
 {
   // Perform preflight checks on arguments
-  if (init_preflight(argc, argv) != 0) goto fail;
+  if (init_preflight(argc, argv) != 0) return 1;
 
   // Verify and open SC5 data for input, seek past SC5 header
   if (init_file_input(argc, argv) != 0) goto fail;
@@ -54,7 +54,7 @@ int init_preflight(int argc, char* argv[])
 {
   if (argc < 3)
   {
-      printf("Usage: SC5PCL <FILENAME> <IP_ADDRESS> <PORT>\n");
+      printf("Usage: SC5PRINT <FILE> <IP> <PORT>\n");
       return 1;
   }
 
@@ -216,4 +216,5 @@ void cleanup()
   if (inputRowBuffer) free(inputRowBuffer);
   if (convertedRowBuffer) free(convertedRowBuffer);
   if (outputBuffer) free(outputBuffer);
+  if (output_mode == OUTPUT_TCP) close_tcp_connection();
 }
