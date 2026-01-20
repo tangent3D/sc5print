@@ -40,8 +40,6 @@ int main(int argc, char* argv[])
   convert();
 
   success:
-    // FIXME: figure out how to check if connection is open at all before attempting to close it...? 
-    if (output_mode == OUTPUT_TCP) close_tcp_connection();
     cleanup();
     return 0;
 
