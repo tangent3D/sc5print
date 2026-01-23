@@ -6,9 +6,10 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
+#include <setjmp.h>
 
 OutputMode output_mode = OUTPUT_TCP;
-
+static jmp_buf abort_env; 
 FILE *read_ptr = NULL;
 FILE *write_ptr= NULL;
 unsigned char *inputRowBuffer = NULL;
@@ -18,6 +19,9 @@ unsigned int outputBufferIndex = 0;
 
 int main(int argc, char* argv[])
 {
+  // Set abort point for output errors (e.g. TCP send failure)
+  if (setjmp(abort_env) != 0) goto fail;
+
   // Perform preflight checks on arguments
   if (init_preflight(argc, argv) != 0) return 1;
 
@@ -39,9 +43,8 @@ int main(int argc, char* argv[])
   // Convert SC5 data to PCL and output according to output mode
   convert();
 
-  success:
-    cleanup();
-    return 0;
+  cleanup();
+  return 0;
 
   fail:
     cleanup();
@@ -200,7 +203,11 @@ void output_flush()
 
   if (output_mode == OUTPUT_TCP)
   {
-    send_tcp_data(outputBuffer, outputBufferIndex);
+    if (send_tcp_data(outputBuffer, outputBufferIndex) != 0)
+    {
+      // Long jump to main() upon output error
+      longjmp(abort_env, 1);
+    }
   }
 
   outputBufferIndex = 0;
